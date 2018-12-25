@@ -16,11 +16,11 @@ public class InGameManager : MonoBehaviour
 
     private int NumberOfGrids;
     private int NumberOfFreeGrids;
-    private Grid grid;
+    public Grid grid;
 
     private int SpawnX;
     private int SpawnY;
-    private float BoxSize;
+    public float BoxSize;
     private bool IncreaseBoxSize;
 
     private void Start()
@@ -63,6 +63,8 @@ public class InGameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             movePlateDown();
+
+            SpawnBox();
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
@@ -244,17 +246,13 @@ public class InGameManager : MonoBehaviour
                                 
                                 if (grid.pointsArray[x, j].value == -1)
                                 {
-                                    grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, 0);
+                                    switchGridsValuesY(-1,x,y,j,0);
                                     break;
                                 }
                                 else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                                 {
+                                    switchGridsValuesY(0, x, y, j,0);
                                     
-                                    grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, 0);
                                     //setScore(grid.pointsgird[x, j].value);
                                     break;
 
@@ -266,20 +264,15 @@ public class InGameManager : MonoBehaviour
                         {
                             if (grid.pointsArray[x, j].value == -1)
                             {
-                                grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
-
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value,0);
+                                switchGridsValuesY(-1, x, y, j,0);
                                 break;
                             }
                             else if(grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                             {
                                 if (grid.pointsArray[x, j - 1].value  >0 && grid.pointsArray[x, j].value != grid.pointsArray[x,j-1].value)
                                     break;
-                                grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
 
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value,0);
+                                switchGridsValuesY(0, x, y, j,0);
                                 break;
 
                                 //setScore(grid.pointsgird[x, j].value);
@@ -313,17 +306,12 @@ public class InGameManager : MonoBehaviour
                             {
                                 if (grid.pointsArray[x, j].value == -1)
                                 {
-                                    grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, 1);
+                                    switchGridsValuesY(-1, x, y, j,1);
                                     break;
                                 }
                                 else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                                 {
-
-                                    grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, 1);
+                                    switchGridsValuesY(0, x, y, j,1);
                                     //setScore(grid.pointsgird[x, j].value);
                                     break;
 
@@ -334,20 +322,15 @@ public class InGameManager : MonoBehaviour
                         {
                             if (grid.pointsArray[x, j].value == -1)
                             {
-                                grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
-
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value,1);
+                                switchGridsValuesY(-1, x, y, j,1);
                                 break;
                             }
                             else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                             {
                                 if (grid.pointsArray[x, j + 1].value > 0 && grid.pointsArray[x, j].value != grid.pointsArray[x, j + 1].value)
                                     break;
-                                grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
 
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value,1);
+                                switchGridsValuesY(0, x, y, j,1);
                                 break;
 
                                 //setScore(grid.pointsgird[x, j].value);
@@ -381,17 +364,12 @@ public class InGameManager : MonoBehaviour
                             {
                                 if (grid.pointsArray[j, y].value == -1)
                                 {
-                                    grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 2);
+                                    switchGridsValuesX(-1, x, y, j, 2);
                                     break;
                                 }
                                 else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                                 {
-
-                                    grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 2);
+                                    switchGridsValuesX(0, x, y, j, 2);
                                     //setScore(grid.pointsgird[x, j].value);
                                     break;
 
@@ -402,20 +380,16 @@ public class InGameManager : MonoBehaviour
                         {
                             if (grid.pointsArray[j, y].value == -1)
                             {
-                                grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
-
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 2);
+                                switchGridsValuesX(-1, x, y, j, 2);
                                 break;
+
                             }
                             else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                             {
                                 if (grid.pointsArray[j - 1, y ].value > 0 && grid.pointsArray[j, y].value != grid.pointsArray[j - 1, y].value)
                                     break;
-                                grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
 
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 2);
+                                switchGridsValuesX(0, x, y, j, 2);
                                 break;
 
                                 //setScore(grid.pointsgird[x, j].value);
@@ -450,17 +424,14 @@ public class InGameManager : MonoBehaviour
                             {
                                 if (grid.pointsArray[j, y].value == -1)
                                 {
-                                    grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 3);
+                                    switchGridsValuesX(-1, x, y, j, 3);
+
                                     break;
                                 }
                                 else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                                 {
+                                    switchGridsValuesX(0, x, y, j, 3);
 
-                                    grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
-                                    grid.pointsArray[x, y].value = -1;
-                                    MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 3);
                                     //setScore(grid.pointsgird[x, j].value);
                                     break;
 
@@ -471,20 +442,17 @@ public class InGameManager : MonoBehaviour
                         {
                             if (grid.pointsArray[j, y].value == -1)
                             {
-                                grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
+                                switchGridsValuesX(-1, x, y, j, 3);
 
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 3);
                                 break;
                             }
                             else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                             {
                                 if (grid.pointsArray[j + 1, y].value > 0 && grid.pointsArray[j, y].value != grid.pointsArray[j + 1, y].value)
                                     break;
-                                grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
-                                grid.pointsArray[x, y].value = -1;
 
-                                MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, 3);
+                                switchGridsValuesX(0, x, y, j, 3);
+
                                 break;
 
                                 //setScore(grid.pointsgird[x, j].value);
@@ -497,9 +465,52 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    private void MovePlateToDestenation(Image box, Vector3 to, int value, int direction)
+    private void switchGridsValuesY(int value, int x , int y , int  j, int direction)
+    {
+        if (value == -1)
+        {
+            grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
+            grid.pointsArray[x, j].box = grid.pointsArray[x, y].box;
+
+            MovePlateToDestenation(grid.pointsArray[x, j].box, null, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, direction);
+        }
+        else
+        {
+            grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
+            MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].box.gameObject, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, direction);
+
+            grid.pointsArray[x, j].box = grid.pointsArray[x, y].box;
+        }
+
+        grid.pointsArray[x, y].value = -1;
+
+    }
+
+    private void switchGridsValuesX(int value, int x, int y, int j, int direction)
+    {
+        if (value == -1)
+        {
+            grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
+            grid.pointsArray[j, y].box = grid.pointsArray[x, y].box;
+
+            MovePlateToDestenation(grid.pointsArray[j, y].box, null, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, direction);
+        }
+        else
+        {
+            grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
+            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[j, y].box.gameObject, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, direction);
+
+            grid.pointsArray[j, y].box = grid.pointsArray[x, y].box;
+        }
+
+        grid.pointsArray[x, y].value = -1;
+        
+    }
+
+    private void MovePlateToDestenation(Image box, GameObject jBox, Vector3 to, int value, int direction)
     {
         Box boxScript = box.GetComponent<Box>();
+        boxScript.box = jBox;
         boxScript.to = to;
         boxScript.value = value;
         switch (direction)
