@@ -1438,6 +1438,7 @@ MonoBehaviour:
   Plane: {fileID: 5772819368400711870, guid: 780bd3a94dcc63945bb3643bf863d511, type: 3}
   Box: {fileID: 8106323183213667126, guid: 655c05c841a19b441b97e2fba1924c2d, type: 3}
   background: {fileID: 1281030758}
+  BoxSize: 0
 --- !u!4 &1989270292
 Transform:
   m_ObjectHideFlags: 0
