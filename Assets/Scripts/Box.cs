@@ -87,6 +87,8 @@ public class Box : MonoBehaviour
 
     private void ReachedPoint()
     {
+
+        //InGameManager.instance.SpawnBox();
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
         GameObject textgObj = transform.GetChild(0).gameObject;
@@ -95,6 +97,8 @@ public class Box : MonoBehaviour
         if (int.Parse(text.text) < value)
         {
             gameObject.GetComponent<Animator>().enabled = true;
+
+            Destroy(box);
         }
         text.text = "" + value;
 
@@ -141,7 +145,6 @@ public class Box : MonoBehaviour
     public void DestroyJbox()
     {
         gameObject.GetComponent<Animator>().enabled = false;
-        Destroy(box);
     }
 }
 

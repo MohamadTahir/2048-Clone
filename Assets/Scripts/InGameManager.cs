@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -11,16 +12,19 @@ public class InGameManager : MonoBehaviour
 
     public Image Plane;
     public Image Box;
+    public Text ScoreTxt;
+    public Text HightScoreTxt;
     public Transform background;
+    public Grid grid;
+    public float BoxSize;
     public static InGameManager instance;
 
     private int NumberOfGrids;
     private int NumberOfFreeGrids;
-    public Grid grid;
-
+    private int score;
+    private int Highscore;
     private int SpawnX;
     private int SpawnY;
-    public float BoxSize;
     private bool IncreaseBoxSize;
 
     private void Start()
@@ -30,30 +34,38 @@ public class InGameManager : MonoBehaviour
         NumberOfGrids = GameSize * GameSize;
         NumberOfFreeGrids = NumberOfGrids;
         IncreaseBoxSize = false;
+
+
+
         grid = new Grid();
-
-
+ 
         GameObject textgObj = Box.transform.GetChild(0).gameObject;
         Text text = textgObj.GetComponent<Text>();
         switch (GameSize)
         {
             case 3:
                 text.fontSize = 60;
+                Highscore = PlayerPrefs.GetInt("highScore3", 0);
                 break;
             case 4:
                 text.fontSize = 50;
+                Highscore = PlayerPrefs.GetInt("highScore4", 0);
                 break;
             case 5:
                 text.fontSize = 40;
+                Highscore = PlayerPrefs.GetInt("highScore5", 0);
                 break;
             case 6:
                 text.fontSize = 35;
+                Highscore = PlayerPrefs.GetInt("highScore6", 0);
                 break;
             case 8:
                 text.fontSize = 25;
+                Highscore = PlayerPrefs.GetInt("highScore8", 0);
                 break;
         }
 
+        HightScoreTxt.text = "" + Highscore;
         CreateGrid();
         SpawnBox();
     }
@@ -63,20 +75,23 @@ public class InGameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             movePlateDown();
-
             SpawnBox();
+
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             movePlateUp();
+            SpawnBox();
         }
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             movePlateRight();
+            SpawnBox();
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             movePlateLeft();
+            SpawnBox();
         }
     }
 
@@ -198,7 +213,7 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    public void InstantiateBoxes()
+    private void InstantiateBoxes()
     {
         for (int x = 0 ; x < GameSize; x++)
         {
@@ -229,58 +244,35 @@ public class InGameManager : MonoBehaviour
     {
         for (int x = 0; x < GameSize; x++)
         {
-            for (int y = GameSize - 2; y >= 0; y--)
+            for (int y = GameSize - 1; y >= 0; y--)
             {
-                if (grid.pointsArray[x, y].value != -1)
+                for (int j = y -1 ; j >= 0; j--)
                 {
-                    for (int j = y+1; j < GameSize ; j++)
+                    if (grid.pointsArray[x, j].value == -1)
                     {
-                        if (j != GameSize - 1)
+                        continue;
+                    }
+                    else
+                    {
+                        if (grid.pointsArray[x, y].value != -1)
                         {
-                            if (grid.pointsArray[x, j + 1].value == -1 || grid.pointsArray[x, j + 1].value == grid.pointsArray[x, y].value)
+                            if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                             {
-                                continue;
+                                switchGridsValuesY(0, x, y, j, 0);
+                                break;
                             }
                             else
                             {
-                                
-                                if (grid.pointsArray[x, j].value == -1)
-                                {
-                                    switchGridsValuesY(-1,x,y,j,0);
-                                    break;
-                                }
-                                else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
-                                {
-                                    switchGridsValuesY(0, x, y, j,0);
-                                    
-                                    //setScore(grid.pointsgird[x, j].value);
-                                    break;
-
-                                }
+                                break;
                             }
-                            
                         }
                         else
                         {
-                            if (grid.pointsArray[x, j].value == -1)
-                            {
-                                switchGridsValuesY(-1, x, y, j,0);
-                                break;
-                            }
-                            else if(grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
-                            {
-                                if (grid.pointsArray[x, j - 1].value  >0 && grid.pointsArray[x, j].value != grid.pointsArray[x,j-1].value)
-                                    break;
-
-                                switchGridsValuesY(0, x, y, j,0);
-                                break;
-
-                                //setScore(grid.pointsgird[x, j].value);
-                            }
+                            switchGridsValuesY(-1, x, y, j, 0);
                         }
                     }
-                }
 
+                }
             }
 
         }
@@ -290,178 +282,109 @@ public class InGameManager : MonoBehaviour
     {
         for (int x = 0; x < GameSize; x++)
         {
-            for (int y = 1 ; y < GameSize ; y++)
+            for (int y = 0 ; y < GameSize ; y++)
             {
-                if (grid.pointsArray[x, y].value != -1)
+                for (int j = y + 1; j < GameSize; j++)
                 {
-                    for (int j = y - 1; j >= 0 ; j--)
+                    if (grid.pointsArray[x, j].value == -1)
                     {
-                        if (j != 0 )
+                        continue;
+                    }
+                    else
+                    {
+                        if (grid.pointsArray[x, y].value != -1)
                         {
-                            if (grid.pointsArray[x, j - 1].value == -1 || grid.pointsArray[x, j - 1].value == grid.pointsArray[x, y].value)
+                            if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
                             {
-                                continue;
+                                switchGridsValuesY(0, x, y, j, 1);
+                                break;
                             }
                             else
                             {
-                                if (grid.pointsArray[x, j].value == -1)
-                                {
-                                    switchGridsValuesY(-1, x, y, j,1);
-                                    break;
-                                }
-                                else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
-                                {
-                                    switchGridsValuesY(0, x, y, j,1);
-                                    //setScore(grid.pointsgird[x, j].value);
-                                    break;
-
-                                }
+                                break;
                             }
                         }
                         else
                         {
-                            if (grid.pointsArray[x, j].value == -1)
-                            {
-                                switchGridsValuesY(-1, x, y, j,1);
-                                break;
-                            }
-                            else if (grid.pointsArray[x, j].value == grid.pointsArray[x, y].value)
-                            {
-                                if (grid.pointsArray[x, j + 1].value > 0 && grid.pointsArray[x, j].value != grid.pointsArray[x, j + 1].value)
-                                    break;
-
-                                switchGridsValuesY(0, x, y, j,1);
-                                break;
-
-                                //setScore(grid.pointsgird[x, j].value);
-                            }
+                            switchGridsValuesY(-1, x, y, j, 1);
                         }
                     }
+
                 }
-
             }
-
         }
     }
 
     private void movePlateRight()
     {
-        for (int x = GameSize -2; x>=0;x--)
+        for (int y = 0; y < GameSize; y++)
         {
-            for (int y =0; y < GameSize; y++)
+            for (int x = GameSize-1; x >=0; x--)
             {
-                if (grid.pointsArray[x, y].value != -1)
+                for (int j = x - 1; j >= 0; j--)
                 {
-                    for (int j = x + 1; j < GameSize; j++)
+                    if (grid.pointsArray[j, y].value == -1)
                     {
-                        if (j != GameSize - 1)
+                        continue;
+                    }
+                    else
+                    {
+                        if (grid.pointsArray[x, y].value != -1)
                         {
-                            if (grid.pointsArray[j + 1, y].value == -1 || grid.pointsArray[j + 1, y].value == grid.pointsArray[x, y].value)
+                            if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                             {
-                                continue;
+                                switchGridsValuesX(0, x, y, j, 2);
+                                break;
                             }
                             else
                             {
-                                if (grid.pointsArray[j, y].value == -1)
-                                {
-                                    switchGridsValuesX(-1, x, y, j, 2);
-                                    break;
-                                }
-                                else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
-                                {
-                                    switchGridsValuesX(0, x, y, j, 2);
-                                    //setScore(grid.pointsgird[x, j].value);
-                                    break;
-
-                                }
+                                break;
                             }
                         }
                         else
                         {
-                            if (grid.pointsArray[j, y].value == -1)
-                            {
-                                switchGridsValuesX(-1, x, y, j, 2);
-                                break;
-
-                            }
-                            else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
-                            {
-                                if (grid.pointsArray[j - 1, y ].value > 0 && grid.pointsArray[j, y].value != grid.pointsArray[j - 1, y].value)
-                                    break;
-
-                                switchGridsValuesX(0, x, y, j, 2);
-                                break;
-
-                                //setScore(grid.pointsgird[x, j].value);
-                            }
+                            switchGridsValuesX(-1, x, y, j, 2);
                         }
                     }
+
                 }
-
             }
-
         }
     }
 
     private void movePlateLeft()
     {
-
-        for (int x = 1; x < GameSize; x++)
+        for (int y = 0; y < GameSize; y++)
         {
-            for (int y = 0 ; y < GameSize; y++)
+            for (int x = 0; x < GameSize; x++)
             {
-                if (grid.pointsArray[x, y].value != -1)
+                for (int j = x + 1; j < GameSize; j++)
                 {
-                    for (int j = x - 1; j >=0; j--)
+                    if (grid.pointsArray[j, y].value == -1)
                     {
-                        if (j != 0)
+                        continue;
+                    }
+                    else
+                    {
+                        if (grid.pointsArray[x, y].value != -1)
                         {
-                            if (grid.pointsArray[j - 1, y].value == -1 || grid.pointsArray[j - 1, y].value == grid.pointsArray[x, y].value)
+                            if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
                             {
-                                continue;
+                                switchGridsValuesX(0, x, y, j, 3);
+                                break;
                             }
                             else
                             {
-                                if (grid.pointsArray[j, y].value == -1)
-                                {
-                                    switchGridsValuesX(-1, x, y, j, 3);
-
-                                    break;
-                                }
-                                else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
-                                {
-                                    switchGridsValuesX(0, x, y, j, 3);
-
-                                    //setScore(grid.pointsgird[x, j].value);
-                                    break;
-
-                                }
+                                break;
                             }
                         }
                         else
                         {
-                            if (grid.pointsArray[j, y].value == -1)
-                            {
-                                switchGridsValuesX(-1, x, y, j, 3);
-
-                                break;
-                            }
-                            else if (grid.pointsArray[j, y].value == grid.pointsArray[x, y].value)
-                            {
-                                if (grid.pointsArray[j + 1, y].value > 0 && grid.pointsArray[j, y].value != grid.pointsArray[j + 1, y].value)
-                                    break;
-
-                                switchGridsValuesX(0, x, y, j, 3);
-
-                                break;
-
-                                //setScore(grid.pointsgird[x, j].value);
-                            }
+                            switchGridsValuesX(-1, x, y, j, 3);
                         }
                     }
                 }
             }
-
         }
     }
 
@@ -469,20 +392,21 @@ public class InGameManager : MonoBehaviour
     {
         if (value == -1)
         {
-            grid.pointsArray[x, j].value += 1 + grid.pointsArray[x, y].value;
-            grid.pointsArray[x, j].box = grid.pointsArray[x, y].box;
+            grid.pointsArray[x, y].value += 1 + grid.pointsArray[x, j].value;
+            grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
 
-            MovePlateToDestenation(grid.pointsArray[x, j].box, null, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, direction);
+            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
         }
         else
         {
-            grid.pointsArray[x, j].value += grid.pointsArray[x, y].value;
-            MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, j].box.gameObject, grid.pointsArray[x, j].pos, grid.pointsArray[x, j].value, direction);
+            grid.pointsArray[x, y].value += grid.pointsArray[x, j].value;
+            MovePlateToDestenation(grid.pointsArray[x, j].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
 
-            grid.pointsArray[x, j].box = grid.pointsArray[x, y].box;
+            grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
+            setScore(grid.pointsArray[x, y].value);
         }
 
-        grid.pointsArray[x, y].value = -1;
+        grid.pointsArray[x, j].value = -1;
 
     }
 
@@ -490,20 +414,21 @@ public class InGameManager : MonoBehaviour
     {
         if (value == -1)
         {
-            grid.pointsArray[j, y].value += 1 + grid.pointsArray[x, y].value;
-            grid.pointsArray[j, y].box = grid.pointsArray[x, y].box;
+            grid.pointsArray[x, y].value += 1 + grid.pointsArray[j, y].value;
+            grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
 
-            MovePlateToDestenation(grid.pointsArray[j, y].box, null, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, direction);
+            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
         }
         else
         {
-            grid.pointsArray[j, y].value += grid.pointsArray[x, y].value;
-            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[j, y].box.gameObject, grid.pointsArray[j, y].pos, grid.pointsArray[j, y].value, direction);
+            grid.pointsArray[x, y].value += grid.pointsArray[j, y].value;
+            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
 
-            grid.pointsArray[j, y].box = grid.pointsArray[x, y].box;
+            grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
+            setScore(grid.pointsArray[x, y].value);
         }
 
-        grid.pointsArray[x, y].value = -1;
+        grid.pointsArray[j, y].value = -1;
         
     }
 
@@ -527,6 +452,35 @@ public class InGameManager : MonoBehaviour
             case 3:
                 boxScript.allowMoveLeft = true;
                 break;
+        }
+    }
+
+    private void setScore(int value)
+    {
+        score += value;
+        ScoreTxt.text = "" + score;
+        if (score > Highscore)
+        {
+            Highscore = score;
+            HightScoreTxt.text = ""+Highscore;
+            switch (GameSize)
+            {
+                case 3:
+                    PlayerPrefs.SetInt("highScore3", Highscore);
+                    break;
+                case 4:
+                    PlayerPrefs.SetInt("highScore4", Highscore);
+                    break;
+                case 5:
+                    PlayerPrefs.SetInt("highScore5", Highscore);
+                    break;
+                case 6:
+                    PlayerPrefs.SetInt("highScore6", Highscore);
+                    break;
+                case 8:
+                    PlayerPrefs.SetInt("highScore8", Highscore);
+                    break;
+            }
         }
     }
 }
