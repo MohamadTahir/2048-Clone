@@ -11,10 +11,9 @@ public class GameManager : MonoBehaviour
     public Text GameModeTxt;
     public string [] GameModes;
     public Sprite[] GameModeImg;
-    public int GameSize = 4;
+    public int GameSize;
 
     public static GameManager Instance;
-
 
     private int GameMode = 1;
 
@@ -46,16 +45,11 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        DontDestroyOnLoad(gameObject);
         SetGameSize();
+        DontDestroyOnLoad(gameObject);
         SceneManager.LoadScene(1);
 
         
-    }
-
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void SetGameSize()
@@ -67,7 +61,7 @@ public class GameManager : MonoBehaviour
             GameSize = 4;
 
         if (GameMode == 2)
-            GameSize = 5;  
+            GameSize = 5;
 
         if (GameMode == 3)
             GameSize = 6;
@@ -75,4 +69,10 @@ public class GameManager : MonoBehaviour
         if (GameMode == 4)
             GameSize = 8;
     }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
 }

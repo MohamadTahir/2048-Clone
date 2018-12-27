@@ -1013,7 +1013,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1faed8f0e86a6e04cb0f97cffbf1805b, type: 3}
   - {fileID: 21300000, guid: 1ca7fe19b3abf22428ffcb922ab26da0, type: 3}
   - {fileID: 21300000, guid: f6b5ff13949449a479d972e653216b4d, type: 3}
-  GameSize: 4
+  GameSize: 0
 --- !u!4 &1469788945
 Transform:
   m_ObjectHideFlags: 0

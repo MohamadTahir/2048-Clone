@@ -35,12 +35,12 @@ public class InGameManager : MonoBehaviour
         NumberOfFreeGrids = NumberOfGrids;
         IncreaseBoxSize = false;
 
-
-
         grid = new Grid();
  
         GameObject textgObj = Box.transform.GetChild(0).gameObject;
         Text text = textgObj.GetComponent<Text>();
+        HightScoreTxt.text = "" + Highscore;
+        CreateGrid();
         switch (GameSize)
         {
             case 3:
@@ -48,7 +48,7 @@ public class InGameManager : MonoBehaviour
                 Highscore = PlayerPrefs.GetInt("highScore3", 0);
                 break;
             case 4:
-                text.fontSize = 50;
+                text.fontSize = (int) BoxSize;
                 Highscore = PlayerPrefs.GetInt("highScore4", 0);
                 break;
             case 5:
@@ -64,9 +64,6 @@ public class InGameManager : MonoBehaviour
                 Highscore = PlayerPrefs.GetInt("highScore8", 0);
                 break;
         }
-
-        HightScoreTxt.text = "" + Highscore;
-        CreateGrid();
         SpawnBox();
     }
 
@@ -151,7 +148,6 @@ public class InGameManager : MonoBehaviour
 
     private void CreateGrid()
     {
-
         float backgroundSize = background.GetComponent<RectTransform>().sizeDelta.x;
         BoxSize = (backgroundSize + GameSize * 1.5f) / GameSize;
         Plane.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
@@ -197,7 +193,7 @@ public class InGameManager : MonoBehaviour
                 box.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
                 box.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
                 box.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
-                box.GetComponent<Image>().color = new Color(255,255,255);
+                box.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
 
                 GameObject textgObj = box.transform.GetChild(0).gameObject;
                 Text text = textgObj.GetComponent<Text>();
