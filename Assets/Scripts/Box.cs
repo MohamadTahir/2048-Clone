@@ -105,38 +105,50 @@ public class Box : MonoBehaviour
         Color boxImageColor = new Color(237, 224, 200);
         switch (value)
         {
+            case 2:
+                boxImageColor = new Color(0.964f, 0.945f, 0.898f);
+                break;
             case 4:
-                boxImageColor = new Color(237, 224, 200);
+                boxImageColor = new Color(1f, 0.964f, 0.874f);
                 break;
             case 8:
-                boxImageColor = new Color(242, 177, 121);
+                boxImageColor = new Color(0.949f, 0.694f, 0.474f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 16:
-                boxImageColor = new Color(245, 149, 99);
+                boxImageColor = new Color(0.960f, 0.584f, 0.388f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 32:
-                boxImageColor = new Color(246, 124, 95);
+                boxImageColor = new Color(0.964f, 0.486f, 0.372f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 64:
-                boxImageColor = new Color(246, 94, 59);
+                boxImageColor = new Color(0.964f, 0.368f, 0.231f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 128:
-                boxImageColor = new Color(237, 207, 114);
+                boxImageColor = new Color(0.929f, 0.811f, 0.447f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 256:
-                boxImageColor = new Color(237, 204, 97);
+                boxImageColor = new Color(0.929f, 0.8f, 0.380f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 512:
-                boxImageColor = new Color(237, 200, 80);
+                boxImageColor = new Color(0.929f, 0.784f, 0.313f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 1024:
-                boxImageColor = new Color(237, 197, 63);
+                boxImageColor = new Color(0.929f, 0.772f, 0.247f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             case 2048:
-                boxImageColor = new Color(237, 194, 46);
+                boxImageColor = new Color(0.929f, 0.760f, 0.180f);
+                text.color = new Color(1f, 1f, 1f);
                 break;
             default:
-                boxImageColor = new Color(238, 228, 218);
+                boxImageColor = new Color(0.933f, 0.894f, 0.854f);
                 break;
         }
         gameObject.GetComponent<Image>().color = boxImageColor;
