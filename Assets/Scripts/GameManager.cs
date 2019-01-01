@@ -1,26 +1,40 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public Image ModeImage;
     public Text GameModeTxt;
-    public string [] GameModes;
+    public string[] GameModes;
     public Sprite[] GameModeImg;
-    public int GameSize;
+    public static int TheGameSize;
 
     public static GameManager Instance;
 
-    private int GameMode = 1;
+    public int GameMode = 1;
 
 
     private void Start()
     {
         Instance = this;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (SceneManager.GetActiveScene().buildIndex==0)
+            {
+                Application.Quit();
+            }
+            else
+            {
+                SceneManager.LoadScene(0);
+            }
+        }
     }
 
     public void LeftArrowPressed()
@@ -45,34 +59,41 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        SetGameSize();
         DontDestroyOnLoad(gameObject);
+        SetGameSize();
         SceneManager.LoadScene(1);
-
-        
     }
 
     private void SetGameSize()
     {
-        if (GameMode == 0)
-            GameSize = 3;
+        switch (GameMode)
+        {
+            case 0:
+                TheGameSize = 3;
+                break;
 
-        if (GameMode == 1)
-            GameSize = 4;
+            case 1:
+                TheGameSize = 4;
+                break;
 
-        if (GameMode == 2)
-            GameSize = 5;
+            case 2:
+                TheGameSize = 5;
+                break;
 
-        if (GameMode == 3)
-            GameSize = 6;
+            case 3:
+                TheGameSize = 6;
+                break;
 
-        if (GameMode == 4)
-            GameSize = 8;
+            case 4:
+                TheGameSize = 8;
+                break;
+        }
     }
 
     public void RestartGame()
     {
+        InGameManager.instance.CurrentData.Clear();
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
-
 }
