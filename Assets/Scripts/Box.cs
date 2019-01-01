@@ -5,10 +5,12 @@ using UnityEngine.UI;
 
 public class Box : MonoBehaviour
 {
+    public static Box instance;
+
     public Vector3 to;
     public GameObject box;
     public int value, x, y;
-    public bool allowMoveDown = false, allowMoveUp = false , allowMoveRight = false, allowMoveLeft = false;
+    public bool allowMoveDown = false, allowMoveUp = false , allowMoveRight = false, allowMoveLeft = false,moving;
     
     private Vector3 RectPos;
     private float BoxSize;
@@ -16,6 +18,8 @@ public class Box : MonoBehaviour
 
     void Start()
     {
+        instance = this;
+        moving=true;
         RectPos = gameObject.GetComponent<RectTransform>().anchoredPosition;
         background = InGameManager.instance.background;
         BoxSize = InGameManager.instance.BoxSize;
@@ -29,10 +33,12 @@ public class Box : MonoBehaviour
         if (allowMoveDown)
         {
             
-            if (RectPos.y > to.y+20)
+            if (RectPos.y > to.y+30)
             {
-                RectPos.y -= 20;
+                moving = true;
+                RectPos.y -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
+                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -41,13 +47,15 @@ public class Box : MonoBehaviour
             }
         }
 
-        if (allowMoveUp)
+        else if (allowMoveUp)
         {
 
-            if (RectPos.y < to.y - 20)
+            if (RectPos.y < to.y - 30)
             {
-                RectPos.y += 20;
+                moving = true;
+                RectPos.y += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
+                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -56,12 +64,14 @@ public class Box : MonoBehaviour
             }
         }
 
-        if (allowMoveRight)
+        else if (allowMoveRight)
         {
-            if (RectPos.x <= to.x - 20)
+            if (RectPos.x <= to.x - 30)
             {
-                RectPos.x +=20;
+                moving = true;
+                RectPos.x += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
+                InGameManager.instance.allowMove = false;
             }
             else 
             {
@@ -70,12 +80,14 @@ public class Box : MonoBehaviour
             }
         }
 
-        if (allowMoveLeft)
+        else if (allowMoveLeft)
         {
-            if (RectPos.x >= to.x + 20)
+            if (RectPos.x >= to.x + 30)
             {
-                RectPos.x -= 20;
+                moving = true;
+                RectPos.x -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
+                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -87,20 +99,22 @@ public class Box : MonoBehaviour
 
     private void ReachedPoint()
     {
+        if(GetComponent<RectTransform>().sizeDelta.x != BoxSize)
+            GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
 
-        //InGameManager.instance.SpawnBox();
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
+
+        setBoxTxtAndColor();
+
+        InGameManager.instance.allowMove = true;
+        InGameManager.instance.SpawnBox();
+    }
+
+    private void setBoxTxtAndColor()
+    {
         GameObject textgObj = transform.GetChild(0).gameObject;
         Text text = textgObj.GetComponent<Text>();
-        
-        if (int.Parse(text.text) < value)
-        {
-            gameObject.GetComponent<Animator>().enabled = true;
-
-            Destroy(box);
-        }
-        text.text = "" + value;
 
         Color boxImageColor = new Color(237, 224, 200);
         switch (value)
@@ -152,11 +166,20 @@ public class Box : MonoBehaviour
                 break;
         }
         gameObject.GetComponent<Image>().color = boxImageColor;
+
+        if (int.Parse(text.text) < value)
+        {
+            gameObject.GetComponent<Animator>().enabled = true;
+
+            Destroy(box);
+        }
+        text.text = "" + value;
     }
 
     public void DestroyJbox()
     {
         gameObject.GetComponent<Animator>().enabled = false;
     }
+    
 }
 
