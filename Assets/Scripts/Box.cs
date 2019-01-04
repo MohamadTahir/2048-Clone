@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class Box : MonoBehaviour
@@ -10,7 +8,7 @@ public class Box : MonoBehaviour
     public Vector3 to;
     public GameObject box;
     public int value, x, y;
-    public bool allowMoveDown = false, allowMoveUp = false , allowMoveRight = false, allowMoveLeft = false,moving;
+    public bool allowMoveDown = false, allowMoveUp = false , allowMoveRight = false, allowMoveLeft = false;
     
     private Vector3 RectPos;
     private float BoxSize;
@@ -19,15 +17,12 @@ public class Box : MonoBehaviour
     void Start()
     {
         instance = this;
-        moving=true;
         RectPos = gameObject.GetComponent<RectTransform>().anchoredPosition;
         background = InGameManager.instance.background;
         BoxSize = InGameManager.instance.BoxSize;
         gameObject.GetComponent<Animator>().enabled = false;
     }
     
-
-
     private void LateUpdate()
     {
         if (allowMoveDown)
@@ -35,10 +30,8 @@ public class Box : MonoBehaviour
             
             if (RectPos.y > to.y+30)
             {
-                moving = true;
                 RectPos.y -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
-                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -52,10 +45,8 @@ public class Box : MonoBehaviour
 
             if (RectPos.y < to.y - 30)
             {
-                moving = true;
                 RectPos.y += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
-                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -68,10 +59,8 @@ public class Box : MonoBehaviour
         {
             if (RectPos.x <= to.x - 30)
             {
-                moving = true;
                 RectPos.x += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
-                InGameManager.instance.allowMove = false;
             }
             else 
             {
@@ -84,10 +73,8 @@ public class Box : MonoBehaviour
         {
             if (RectPos.x >= to.x + 30)
             {
-                moving = true;
                 RectPos.x -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
-                InGameManager.instance.allowMove = false;
             }
             else
             {
@@ -105,9 +92,10 @@ public class Box : MonoBehaviour
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
 
+
         setBoxTxtAndColor();
 
-        InGameManager.instance.allowMove = true;
+        InGameManager.instance.grid.pointsArray[x, y].moving = false;
         InGameManager.instance.SpawnBox();
     }
 

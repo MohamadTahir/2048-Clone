@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -14,16 +13,13 @@ public class InGameManager : MonoBehaviour
     public Image Plane, box, GameOver;
     public Text ScoreTxt, HightScoreTxt;
     public Grid grid;
-    public GameSaveStatus gameSaveStatus;
     public Transform background;
     public float BoxSize;
-    public bool allowMove;
     public List<previousData> CurrentData;
 
-    private float sensitivity;
-    private Vector3 directionVector;
-    private int SpawnX, SpawnY, Highscore, score, NumberOfFreeGrids=0, NumberOfGrids,PrevScore=0,tempPreviousScore;
-    private bool IncreaseBoxSize , twoMatchingOnY, twoMatchingOnX, AllowSpawn;
+    private float sensitivity=50;
+    private int SpawnX, SpawnY, Highscore, score, NumberOfFreeGrids=0, NumberOfGrids,PrevScore=0,tempPreviousScore,NumbOfSpawns=0;
+    private bool IncreaseBoxSize = false, twoMatchingOnY, twoMatchingOnX, allowMove = true, allowSpawn=true;
     private List<previousData> previousStep, previousStepTemp, temp;
     
     private void Start()
@@ -32,6 +28,7 @@ public class InGameManager : MonoBehaviour
         CreateGrid();
         SetHighScore();
         LoadGame();
+        setScore(PlayerPrefs.GetInt("score", 0));
     }
     
     private void init()
@@ -40,15 +37,10 @@ public class InGameManager : MonoBehaviour
         gameSize = GameManager.TheGameSize;
         NumberOfGrids = gameSize * gameSize;
         grid = new Grid();
-        gameSaveStatus = new GameSaveStatus();
         previousStepTemp = new List<previousData>();
         previousStep = new List<previousData>();
         CurrentData = new List<previousData>();
         temp = new List<previousData>();
-        IncreaseBoxSize = false;
-        AllowSpawn = true;
-        allowMove = true;
-        sensitivity = 50f;
     }
 
     private void Update()
@@ -143,36 +135,16 @@ public class InGameManager : MonoBehaviour
 
     }
 
-    [System.Serializable]
-    public class GameSaveStatus
-    {
-        public List<previousData> grid3;
-        public List<previousData> grid4;
-        public List<previousData> grid5;
-        public List<previousData> grid6;
-        public List<previousData> grid8;
-
-        public GameSaveStatus()
-        {
-            grid3 = new List<previousData>();
-            grid4 = new List<previousData>();
-            grid5 = new List<previousData>();
-            grid6 = new List<previousData>();
-            grid8 = new List<previousData>();
-        }
-
-    }
-
     public class points
     {
-        public int index;
+        public bool moving;
         public int value;
         public Vector2 pos;
         public Image box;
 
-        public points(int _index, int _value, Vector2 _pos,Image _box)
+        public points(bool _moving, int _value, Vector2 _pos,Image _box)
         {
-            index = _index;
+            moving = _moving;
             value = _value;
             pos = _pos;
             box = _box;
@@ -185,15 +157,13 @@ public class InGameManager : MonoBehaviour
 
         public Grid()
         {
-            int index = 0;
             pointsArray = new points[gameSize, gameSize];
 
             for (int x = 0; x < gameSize; x++)
             {
                 for (int y = 0; y < gameSize; y++)
                 {
-                    index++;
-                    pointsArray[x, y] = new points(index, -1, new Vector2(0, 0), null);
+                    pointsArray[x, y] = new points(false, -1, new Vector2(0, 0), null);
                 }
             }
         }
@@ -233,10 +203,10 @@ public class InGameManager : MonoBehaviour
 
     public void SpawnBox()
     {
-        if (AllowSpawn)
+        if  (allowSpawn &&!IsBricksMoving())
         {
-            AllowSpawn = false;
-            for (int i = 0; i < NumberOfGrids; )
+            allowSpawn = false;
+            for (int i = 0; i < 1; )
             {
                 int Randx = Random.Range(0, gameSize);
                 int Randy = Random.Range(0, gameSize);
@@ -263,14 +233,48 @@ public class InGameManager : MonoBehaviour
                     break;
                 }
             }
+            CountFreeGrids();
+            checkSurrounding();
+
             previousStep.Clear();
             previousStep.AddRange(previousStepTemp);
             previousStepTemp.Clear();
-            SaveGame();
 
-            CountFreeGrids();
-            checkSurrounding();
+            NumbOfSpawns++;
+
+            if (NumbOfSpawns > 150)
+            {
+                Debug.Log("sent request");
+                AdsManager.instance.ShowAdd();
+                NumbOfSpawns = 0;
+            }
+            if (NumberOfFreeGrids != NumberOfGrids -1) 
+                SaveGame();
+
         }
+    }
+
+    private bool IsBricksMoving()
+    {
+        int moving = 0;
+        for (int x = 0; x < gameSize; x ++)
+        {
+            for ( int y= 0; y < gameSize; y ++)
+            {
+                if (grid.pointsArray[x,y].moving == false)
+                {
+                    moving++;
+                }
+            }
+        }
+
+        if (moving == NumberOfGrids)
+        {
+            allowMove = true;
+            return false;
+        }
+        else
+            return true;
     }
 
     private void CountFreeGrids()
@@ -501,18 +505,17 @@ public class InGameManager : MonoBehaviour
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[x, j].value;
             grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
             
-            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
+            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
         }
         else
         {
             grid.pointsArray[x, y].value += grid.pointsArray[x, j].value;
             setScore(grid.pointsArray[x, y].value);
-            MovePlateToDestenation(grid.pointsArray[x, j].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
+            MovePlateToDestenation(grid.pointsArray[x, j].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
             
             grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
         }
         grid.pointsArray[x, j].value = -1;
-        AllowSpawn = true;
 
     }
 
@@ -523,30 +526,36 @@ public class InGameManager : MonoBehaviour
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[j, y].value;
             grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
 
-            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
+            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
         }
         else
         {
             grid.pointsArray[x, y].value += grid.pointsArray[j, y].value;
             setScore(grid.pointsArray[x, y].value);
-            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction);
+            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
             
             grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
         }
         grid.pointsArray[j, y].value = -1;
-        AllowSpawn = true;
 
     }
 
-    private void MovePlateToDestenation(Image box, GameObject jBox, Vector3 to, int value, int direction)
+    private void MovePlateToDestenation(Image box, GameObject jBox, Vector3 to, int value, int direction, int x, int y)
     {
-        if (tempPreviousScore != score)
+        grid.pointsArray[x, y].moving = true;
+
+        if (PrevScore != tempPreviousScore)
+        {
             PrevScore = tempPreviousScore;
+        }
 
         Box boxScript = box.GetComponent<Box>();
         boxScript.box = jBox;
         boxScript.to = to;
         boxScript.value = value;
+        boxScript.x = x;
+        boxScript.y = y;
+
         switch (direction)
         {
             case 0:
@@ -562,6 +571,7 @@ public class InGameManager : MonoBehaviour
                 boxScript.allowMoveLeft = true;
                 break;
         }
+        allowSpawn = true;
         allowMove = false;
     }
 
@@ -569,6 +579,7 @@ public class InGameManager : MonoBehaviour
     {
         score += value;
         ScoreTxt.text = "" + score;
+        PlayerPrefs.SetInt("score", score);
         if (score > Highscore)
         {
             Highscore = score;
@@ -742,129 +753,26 @@ public class InGameManager : MonoBehaviour
     {
         CurrentData.Clear();
         CurrentData.AddRange(StorePreviousTemp());
-        
-        if (File.Exists(Application.persistentDataPath + "/SaveGame.dat"))
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/SaveGame.dat", FileMode.Open);
-            GameSaveStatus savedGames = (GameSaveStatus)bf.Deserialize(file);
-            file.Close();
 
-            FileUtil.DeleteFileOrDirectory(Application.persistentDataPath + "/SaveGame.dat");
-
-            switch (gameSize)
-            {
-                case 3:
-                    savedGames.grid3.Clear();
-                    savedGames.grid3.AddRange(CurrentData);
-                    break;
-
-                case 4:
-                    savedGames.grid8.Clear();
-                    savedGames.grid8.AddRange(CurrentData);
-                    break;
-
-                case 5:
-                    savedGames.grid8.Clear();
-                    savedGames.grid8.AddRange(CurrentData);
-                    break;
-
-                case 6:
-                    savedGames.grid8.Clear();
-                    savedGames.grid8.AddRange(CurrentData);
-                    break;
-
-                case 8:
-                    savedGames.grid8.Clear();
-                    savedGames.grid8.AddRange(CurrentData);
-                    break;
-            }
-            
-            FileStream saveFile = File.Create(Application.persistentDataPath + "/SaveGame.dat");
-            bf.Serialize(saveFile, savedGames);
-            saveFile.Close();
-        }
-        else
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/SaveGame.dat");
-
-            switch (gameSize)
-            {
-                case 3:
-                    gameSaveStatus.grid3.AddRange(CurrentData);
-                    break;
-                case 4:
-                    gameSaveStatus.grid4.AddRange(CurrentData);
-                    break;
-                case 5:
-                    gameSaveStatus.grid5.AddRange(CurrentData);
-                    break;
-                case 6:
-                    gameSaveStatus.grid6.AddRange(CurrentData);
-                    break;
-                case 8:
-                    gameSaveStatus.grid8.AddRange(CurrentData);
-                    break;
-            }
-
-            bf.Serialize(file, gameSaveStatus);
-            file.Close();
-        }
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file3 = File.Create(Application.persistentDataPath + "/SaveGame"+gameSize+".dat");
+        bf.Serialize(file3, CurrentData);
+        file3.Close();
     }
 
     private void LoadGame()
     {
-        if (File.Exists(Application.persistentDataPath + "/SaveGame.dat"))
+        if (File.Exists(Application.persistentDataPath + "/SaveGame" + gameSize + ".dat"))
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/SaveGame.dat", FileMode.Open);
-            GameSaveStatus savedGames = (GameSaveStatus)bf.Deserialize(file);
+            FileStream file = File.Open(Application.persistentDataPath + "/SaveGame"+gameSize+".dat", FileMode.Open);
+            List<previousData> savedGames = (List<previousData>)bf.Deserialize(file);
             file.Close();
 
-            switch (gameSize)
-            {
-                case 3:
-
-                    if (savedGames.grid3.Count > 0)
-                        InstantiateBoxes(savedGames.grid3);
-                    else
-                        SpawnBox();
-                    break;
-
-                case 4:
-                    
-                    if (savedGames.grid4.Count > 0)
-                        InstantiateBoxes(savedGames.grid4);
-                    else
-                        SpawnBox();
-                    break;
-
-                case 5:
-
-                    if (savedGames.grid5.Count > 0)
-                        InstantiateBoxes(savedGames.grid5);
-                    else
-                        SpawnBox();
-                    break;
-                    
-                case 6:
-
-                    if (savedGames.grid6.Count > 0)
-                        InstantiateBoxes(savedGames.grid6);
-                    else
-                        SpawnBox();
-                    break;
-
-                case 8:
-
-                    if (savedGames.grid8.Count > 0)
-                        InstantiateBoxes(savedGames.grid8);
-                    else
-                        SpawnBox();
-                    break;
-            }
-
+            if (savedGames.Count > 0)
+                InstantiateBoxes(savedGames);
+            else
+                SpawnBox();
         }
         else
         {
