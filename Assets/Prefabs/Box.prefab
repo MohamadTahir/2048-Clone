@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8106323183213667126}
   - component: {fileID: 3307967698138162514}
   - component: {fileID: 2121538272218937406}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Box
   m_TagString: box
   m_Icon: {fileID: 0}
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.964, g: 0.945, b: 0.898, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -89,8 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2decb240c22ba48a3a7ebae6dc9d5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  to: {x: 0, y: 0, z: 0}
-  box: {fileID: 0}
+  to: {x: 0, y: 0}
   value: 0
   x: 0
   y: 0
@@ -128,7 +127,7 @@ GameObject:
   - component: {fileID: 7901665568859088234}
   - component: {fileID: 4458442255431825811}
   - component: {fileID: 2975221439471046868}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}

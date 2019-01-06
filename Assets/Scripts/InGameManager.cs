@@ -13,12 +13,13 @@ public class InGameManager : MonoBehaviour
     public Image Plane, box, GameOver;
     public Text ScoreTxt, HightScoreTxt;
     public Grid grid;
-    public Transform background;
+    public Transform background, front, back;
     public float BoxSize;
     public List<previousData> CurrentData;
+    public int NumbOfSpawns = 0;
 
     private float sensitivity=50;
-    private int SpawnX, SpawnY, Highscore, score, NumberOfFreeGrids=0, NumberOfGrids,PrevScore=0,tempPreviousScore,NumbOfSpawns=0;
+    private int SpawnX, SpawnY, Highscore, score, NumberOfFreeGrids=0, NumberOfGrids,PrevScore=0,tempPreviousScore;
     private bool IncreaseBoxSize = false, twoMatchingOnY, twoMatchingOnX, allowMove = true, allowSpawn=true;
     private List<previousData> previousStep, previousStepTemp, temp;
     
@@ -27,7 +28,8 @@ public class InGameManager : MonoBehaviour
         init();
         CreateGrid();
         SetHighScore();
-        LoadGame();
+        SpawnBox();
+        //LoadGame();
         setScore(PlayerPrefs.GetInt("score", 0));
     }
     
@@ -46,9 +48,9 @@ public class InGameManager : MonoBehaviour
     private void Update()
     {
 
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved || Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Stationary)
+        if (allowMove)
         {
-            if (allowMove)
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved || Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Stationary)
             {
                 Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
                 if (touchDeltaPosition.x > sensitivity)
@@ -82,21 +84,25 @@ public class InGameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
+                Debug.Log("down");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateDown();
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
+                Debug.Log("up");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateUp();
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
+                Debug.Log("right");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateRight();
             }
             else if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
+                Debug.Log("left");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateLeft();
             }
@@ -187,12 +193,22 @@ public class InGameManager : MonoBehaviour
         {
             for (int y = 0; y < gameSize; y++)
             {
-                var box = Instantiate(Plane, new Vector2(posx, posy), Quaternion.identity);
-                box.transform.SetParent(background, false);
-                box.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
-                box.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
-                box.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+                var plane = Instantiate(Plane, new Vector2(posx, posy), Quaternion.identity);
+                plane.transform.SetParent(back, false);
+                plane.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
+                plane.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
+                plane.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+
+                var Thebox = Instantiate(box, new Vector2(posx, posy), Quaternion.identity);
+                Thebox.transform.SetParent(front, false);
+                Thebox.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
+                Thebox.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
+                Thebox.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+                Thebox.gameObject.SetActive(false);
                 grid.pointsArray[x, y].pos = new Vector2(posx,posy);
+                grid.pointsArray[x, y].box = Thebox;
+                grid.pointsArray[x, y].value = -1;
+
                 posy -= BoxSize + PartOfBoxSize - 2;
             }
             posy = -BoxSize / 2 - PartOfBoxSize;
@@ -203,6 +219,7 @@ public class InGameManager : MonoBehaviour
 
     public void SpawnBox()
     {
+        Debug.Log("spawn");
         if  (allowSpawn &&!IsBricksMoving())
         {
             allowSpawn = false;
@@ -213,22 +230,17 @@ public class InGameManager : MonoBehaviour
 
                 if (grid.pointsArray[Randx, Randy].value == -1)
                 {
-
-                    var Thebox = Instantiate(box, grid.pointsArray[Randx, Randy].pos, Quaternion.identity);
-                    Thebox.transform.SetParent(background.transform, false);
-                    Thebox.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
-                    Thebox.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
-                    Thebox.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
-                    Thebox.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
-
-                    GameObject textgObj = Thebox.transform.GetChild(0).gameObject;
+                    GameObject textgObj =  grid.pointsArray[Randx, Randy].box.transform.GetChild(0).gameObject;
                     Text text = textgObj.GetComponent<Text>();
                     text.text = "2";
+                    text.color = new Color(0f, 0f, 0f);
+                    grid.pointsArray[Randx, Randy].value = 2;
 
+                    grid.pointsArray[Randx, Randy].box.gameObject.GetComponent<RectTransform>().anchoredPosition = grid.pointsArray[Randx, Randy].pos;
+                    grid.pointsArray[Randx, Randy].box.gameObject.SetActive(true);
+                    
                     SpawnX = Randx;
                     SpawnY = Randy;
-                    grid.pointsArray[Randx, Randy].value = 2;
-                    grid.pointsArray[Randx, Randy].box = Thebox;
                     IncreaseBoxSize = true;
                     break;
                 }
@@ -244,9 +256,7 @@ public class InGameManager : MonoBehaviour
 
             if (NumbOfSpawns > 150)
             {
-                Debug.Log("sent request");
                 AdsManager.instance.ShowAdd();
-                NumbOfSpawns = 0;
             }
             if (NumberOfFreeGrids != NumberOfGrids -1) 
                 SaveGame();
@@ -500,47 +510,53 @@ public class InGameManager : MonoBehaviour
 
     private void switchGridsValuesY(int value, int x , int y , int  j, int direction)
     {
+        bool increamented = false;
+        Image boxTemp;
         if (value == -1)
         {
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[x, j].value;
-            grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
-            
-            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
         }
         else
         {
             grid.pointsArray[x, y].value += grid.pointsArray[x, j].value;
             setScore(grid.pointsArray[x, y].value);
-            MovePlateToDestenation(grid.pointsArray[x, j].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
-            
-            grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
+            increamented = true;
         }
+
+        boxTemp = grid.pointsArray[x, y].box;
+        grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
+        grid.pointsArray[x, j].box = boxTemp;
+
+        MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction, x, y,j,increamented);
         grid.pointsArray[x, j].value = -1;
 
     }
 
     private void switchGridsValuesX(int value, int x, int y, int j, int direction)
     {
+        bool increamented = false;
+        Image boxTemp;
         if (value == -1)
         {
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[j, y].value;
-            grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
-
-            MovePlateToDestenation(grid.pointsArray[x, y].box, null, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
         }
         else
         {
             grid.pointsArray[x, y].value += grid.pointsArray[j, y].value;
             setScore(grid.pointsArray[x, y].value);
-            MovePlateToDestenation(grid.pointsArray[j, y].box, grid.pointsArray[x, y].box.gameObject, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction,x,y);
-            
-            grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
+            increamented = true;
         }
+
+        boxTemp = grid.pointsArray[x, y].box;
+        grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
+        grid.pointsArray[j, y].box = boxTemp;
+
+        MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction, x, y,j, increamented);
         grid.pointsArray[j, y].value = -1;
 
     }
 
-    private void MovePlateToDestenation(Image box, GameObject jBox, Vector3 to, int value, int direction, int x, int y)
+    private void MovePlateToDestenation(Image box, Vector2 to, int value, int direction, int x, int y,int j,bool incremented)
     {
         grid.pointsArray[x, y].moving = true;
 
@@ -550,11 +566,12 @@ public class InGameManager : MonoBehaviour
         }
 
         Box boxScript = box.GetComponent<Box>();
-        boxScript.box = jBox;
         boxScript.to = to;
         boxScript.value = value;
         boxScript.x = x;
         boxScript.y = y;
+        boxScript.j = j;
+        boxScript.increamented = incremented;
 
         switch (direction)
         {
@@ -651,8 +668,12 @@ public class InGameManager : MonoBehaviour
                 if (grid.pointsArray[x, y].value != -1)
                 {
                     grid.pointsArray[x, y].value = -1;
-                    Destroy(grid.pointsArray[x, y].box.gameObject);
-                    grid.pointsArray[x, y].box = null;
+                    grid.pointsArray[x, y].box.gameObject.SetActive(false);
+                    grid.pointsArray[x, y].box.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
+                    GameObject textgObj = grid.pointsArray[x, y].box.transform.GetChild(0).gameObject;
+                    Text text = textgObj.GetComponent<Text>();
+                    text.text = "2";
+                    box.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
                 }
             }
         }
@@ -683,13 +704,11 @@ public class InGameManager : MonoBehaviour
     {
         for (int i = 0; i < BoxList.Count; i++)
         {
-            var Thebox = Instantiate(box, grid.pointsArray[BoxList[i].x, BoxList[i].y].pos, Quaternion.identity);
-            Thebox.transform.SetParent(background.transform, false);
-            Thebox.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
-            Thebox.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
-            Thebox.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
-            Thebox.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
-            GameObject textgObj = Thebox.transform.GetChild(0).gameObject;
+            GameObject box = grid.pointsArray[BoxList[i].x, BoxList[i].y].box.gameObject;
+
+            box.SetActive(true);
+            box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
+            GameObject textgObj =box.transform.GetChild(0).gameObject;
             Text text = textgObj.GetComponent<Text>();
             text.text = "" + BoxList[i].value;
 
@@ -742,9 +761,7 @@ public class InGameManager : MonoBehaviour
                     boxImageColor = new Color(0.933f, 0.894f, 0.854f);
                     break;
             }
-            Thebox.GetComponent<Image>().color = boxImageColor;
-
-            grid.pointsArray[BoxList[i].x, BoxList[i].y].box = Thebox;
+            box.GetComponent<Image>().color = boxImageColor;
             grid.pointsArray[BoxList[i].x, BoxList[i].y].value = BoxList[i].value;
         }
     }
