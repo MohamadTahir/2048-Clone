@@ -15,6 +15,7 @@ public class InGameManager : MonoBehaviour
     public Grid grid;
     public Transform background, front, back;
     public float BoxSize;
+    public Boxes[] boxes;
     public List<previousData> CurrentData;
     public int NumbOfSpawns = 0;
 
@@ -39,6 +40,7 @@ public class InGameManager : MonoBehaviour
         gameSize = GameManager.TheGameSize;
         NumberOfGrids = gameSize * gameSize;
         grid = new Grid();
+        boxes = new Boxes[NumberOfGrids];
         previousStepTemp = new List<previousData>();
         previousStep = new List<previousData>();
         CurrentData = new List<previousData>();
@@ -84,25 +86,21 @@ public class InGameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                Debug.Log("down");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateDown();
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                Debug.Log("up");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateUp();
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                Debug.Log("right");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateRight();
             }
             else if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                Debug.Log("left");
                 previousStepTemp.AddRange(StorePreviousTemp());
                 movePlateLeft();
             }
@@ -123,6 +121,22 @@ public class InGameManager : MonoBehaviour
                 grid.pointsArray[SpawnX, SpawnY].box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
             }
 
+        }
+    }
+
+    public class Boxes
+    {
+        public Image box;
+        public bool InUse;
+        public int x;
+        public int y;
+
+        public Boxes(Image _box , bool _inUse, int _x , int _y)
+        {
+            box = _box;
+            InUse = _inUse;
+            x = _x;
+            y = _y;
         }
     }
 
@@ -189,6 +203,7 @@ public class InGameManager : MonoBehaviour
         float posx = BoxSize / 2 + PartOfBoxSize;
         float posy = -BoxSize / 2 - PartOfBoxSize;
 
+        int index = 0;
         for (int x = 0; x < gameSize; x++)
         {
             for (int y = 0; y < gameSize; y++)
@@ -199,16 +214,18 @@ public class InGameManager : MonoBehaviour
                 plane.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
                 plane.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
 
+                grid.pointsArray[x, y].pos = new Vector2(posx, posy);
+
                 var Thebox = Instantiate(box, new Vector2(posx, posy), Quaternion.identity);
                 Thebox.transform.SetParent(front, false);
                 Thebox.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
                 Thebox.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
                 Thebox.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
                 Thebox.gameObject.SetActive(false);
-                grid.pointsArray[x, y].pos = new Vector2(posx,posy);
-                grid.pointsArray[x, y].box = Thebox;
-                grid.pointsArray[x, y].value = -1;
+                Boxes newBox = new Boxes(Thebox,false,-1,-1);
+                boxes[index] = newBox;
 
+                index++;
                 posy -= BoxSize + PartOfBoxSize - 2;
             }
             posy = -BoxSize / 2 - PartOfBoxSize;
@@ -219,7 +236,6 @@ public class InGameManager : MonoBehaviour
 
     public void SpawnBox()
     {
-        Debug.Log("spawn");
         if  (allowSpawn &&!IsBricksMoving())
         {
             allowSpawn = false;
@@ -230,6 +246,7 @@ public class InGameManager : MonoBehaviour
 
                 if (grid.pointsArray[Randx, Randy].value == -1)
                 {
+                    grid.pointsArray[Randx, Randy].box = getAvailableBox(Randx, Randy);
                     GameObject textgObj =  grid.pointsArray[Randx, Randy].box.transform.GetChild(0).gameObject;
                     Text text = textgObj.GetComponent<Text>();
                     text.text = "2";
@@ -261,6 +278,63 @@ public class InGameManager : MonoBehaviour
             if (NumberOfFreeGrids != NumberOfGrids -1) 
                 SaveGame();
 
+        }
+    }
+
+    private Image getAvailableBox(int x, int y)
+    {
+        for (int i =0; i < boxes.Length; i++)
+        {
+            if (!boxes[i].InUse)
+            {
+                boxes[i].InUse = true;
+                boxes[i].x = x;
+                boxes[i].y = y;
+                return boxes[i].box;
+            }
+        }
+        return null;
+    }
+
+    private Image ModifyBox(int x , int y , int NewX , int NewY, bool InUse)
+    {
+        for (int i=0 ; i < boxes.Length; i++)
+        {
+            if (boxes[i].x == x && boxes[i].y == y)
+            {
+                boxes[i].x = NewX;
+                boxes[i].y = NewY;
+                boxes[i].InUse = InUse;
+                return boxes[i].box;
+            }
+        }
+        return null;
+    }
+
+    private int FindBox(int x, int y)
+    {
+        for (int i = 0; i < boxes.Length; i++)
+        {
+            if (!boxes[i].InUse)
+            {
+               return i;
+            }
+        }
+        return -1;
+    }
+
+    public void UnsetBox(int index)
+    {
+        if (index != -1) {
+            boxes[index].x = -1;
+            boxes[index].y = -1;
+            boxes[index].InUse = false;
+            boxes[index].box.gameObject.SetActive(false);
+            boxes[index].box.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
+            boxes[index].box.gameObject.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
+            GameObject textgObj = boxes[index].box.transform.GetChild(0).gameObject;
+            Text text = textgObj.GetComponent<Text>();
+            text.color = new Color(0f, 0f, 0f);
         }
     }
 
@@ -511,7 +585,7 @@ public class InGameManager : MonoBehaviour
     private void switchGridsValuesY(int value, int x , int y , int  j, int direction)
     {
         bool increamented = false;
-        Image boxTemp;
+        int DestroyIndex = -1;
         if (value == -1)
         {
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[x, j].value;
@@ -521,13 +595,21 @@ public class InGameManager : MonoBehaviour
             grid.pointsArray[x, y].value += grid.pointsArray[x, j].value;
             setScore(grid.pointsArray[x, y].value);
             increamented = true;
+            DestroyIndex = FindBox(x,y);
         }
 
-        boxTemp = grid.pointsArray[x, y].box;
-        grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
-        grid.pointsArray[x, j].box = boxTemp;
+        Image moving_box = ModifyBox(x, j, x, y, true);
 
-        MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction, x, y,j,increamented);
+        MovePlateToDestenation(moving_box, 
+                               grid.pointsArray[x, y].pos, 
+                               grid.pointsArray[x, y].value, 
+                               direction, 
+                               x, 
+                               y, 
+                               DestroyIndex,
+                               increamented);
+
+        grid.pointsArray[x, y].box = grid.pointsArray[x, j].box;
         grid.pointsArray[x, j].value = -1;
 
     }
@@ -535,7 +617,7 @@ public class InGameManager : MonoBehaviour
     private void switchGridsValuesX(int value, int x, int y, int j, int direction)
     {
         bool increamented = false;
-        Image boxTemp;
+        int DestroyIndex = -1;
         if (value == -1)
         {
             grid.pointsArray[x, y].value += 1 + grid.pointsArray[j, y].value;
@@ -545,18 +627,26 @@ public class InGameManager : MonoBehaviour
             grid.pointsArray[x, y].value += grid.pointsArray[j, y].value;
             setScore(grid.pointsArray[x, y].value);
             increamented = true;
+            DestroyIndex = FindBox(x, y);
         }
 
-        boxTemp = grid.pointsArray[x, y].box;
-        grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
-        grid.pointsArray[j, y].box = boxTemp;
+        Image moving_box = ModifyBox(j, y, x, y, true);
 
-        MovePlateToDestenation(grid.pointsArray[x, y].box, grid.pointsArray[x, y].pos, grid.pointsArray[x, y].value, direction, x, y,j, increamented);
+        MovePlateToDestenation(moving_box, 
+                               grid.pointsArray[x, y].pos, 
+                               grid.pointsArray[x, y].value, 
+                               direction, 
+                               x, 
+                               y,
+                               DestroyIndex, 
+                               increamented);
+
+        grid.pointsArray[x, y].box = grid.pointsArray[j, y].box;
         grid.pointsArray[j, y].value = -1;
 
     }
 
-    private void MovePlateToDestenation(Image box, Vector2 to, int value, int direction, int x, int y,int j,bool incremented)
+    private void MovePlateToDestenation(Image box, Vector2 to, int value, int direction, int x, int y,int DestroyIndex, bool incremented)
     {
         grid.pointsArray[x, y].moving = true;
 
@@ -570,9 +660,9 @@ public class InGameManager : MonoBehaviour
         boxScript.value = value;
         boxScript.x = x;
         boxScript.y = y;
-        boxScript.j = j;
+        boxScript.DestroyIndex = DestroyIndex;
         boxScript.increamented = incremented;
-
+        
         switch (direction)
         {
             case 0:

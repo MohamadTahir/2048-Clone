@@ -1703,7 +1703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7f01858053e133449d82b40abc60158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Plane: {fileID: 5772819368400711870, guid: 780bd3a94dcc63945bb3643bf863d511, type: 3}
+  Plane: {fileID: 27, guid: 780bd3a94dcc63945bb3643bf863d511, type: 3}
   box: {fileID: 8106323183213667126, guid: 655c05c841a19b441b97e2fba1924c2d, type: 3}
   GameOver: {fileID: 1379778868}
   ScoreTxt: {fileID: 1835789477}
