@@ -6,7 +6,7 @@ public class Box : MonoBehaviour
     public static Box instance;
 
     public Vector2 to;
-    public int value, x, y,j;
+    public int value, x, y, DestroyIndex;
     public bool allowMoveDown = false, allowMoveUp = false, allowMoveRight = false, allowMoveLeft = false, Y = false, increamented = false;
     
     private Vector2 RectPos, startPos;
@@ -90,25 +90,10 @@ public class Box : MonoBehaviour
     {
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
-        setBox(x, y, InGameManager.instance.grid.pointsArray[x, y].value);
+        
+        InGameManager.instance.UnsetBox(0);
 
-        GameObject Jbox = null;
-        if (Y)
-        {
-            Y = false;
-            Jbox = InGameManager.instance.grid.pointsArray[x, j].box.gameObject;
-        }
-        else
-        {
-            Jbox = InGameManager.instance.grid.pointsArray[j, y].box.gameObject;
-
-        }
-        Jbox.SetActive(false);
-        Jbox.GetComponent<RectTransform>().sizeDelta = new Vector2(25, 25);
-        Jbox.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
-        GameObject textgObj = transform.GetChild(0).gameObject;
-        Text text = textgObj.GetComponent<Text>();
-        text.color = new Color(0f, 0f, 0f);
+        setBox(value);
 
         InGameManager.instance.grid.pointsArray[x, y].moving = false;
 
@@ -116,10 +101,10 @@ public class Box : MonoBehaviour
 
     }
 
-    private void setBox(int X,int Y, int SCORE)
+    private void setBox( int SCORE)
     {
 
-        GameObject textgObj = InGameManager.instance.grid.pointsArray[X , Y].box.transform.GetChild(0).gameObject;
+        GameObject textgObj = InGameManager.instance.grid.pointsArray[x , y].box.transform.GetChild(0).gameObject;
         Text text = textgObj.GetComponent<Text>();
 
         Color boxImageColor = new Color(237, 224, 200);
@@ -173,8 +158,8 @@ public class Box : MonoBehaviour
                 boxImageColor = new Color(0.933f, 0.894f, 0.854f);
                 break;
         }
-        InGameManager.instance.grid.pointsArray[X, Y].box.gameObject.GetComponent<Image>().color = boxImageColor;
-        InGameManager.instance.grid.pointsArray[X, Y].box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
+        InGameManager.instance.grid.pointsArray[x, y].box.gameObject.GetComponent<Image>().color = boxImageColor;
+        InGameManager.instance.grid.pointsArray[x, y].box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
 
         if (increamented)
         {
