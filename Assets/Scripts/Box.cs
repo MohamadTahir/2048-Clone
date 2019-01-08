@@ -6,10 +6,11 @@ public class Box : MonoBehaviour
     public static Box instance;
 
     public Vector2 to;
-    public int value, x, y, DestroyIndex;
+    public int  x, y, value;
+    public GameObject DestroyBox;
     public bool allowMoveDown = false, allowMoveUp = false, allowMoveRight = false, allowMoveLeft = false, Y = false, increamented = false;
     
-    private Vector2 RectPos, startPos;
+    public Vector2 RectPos;
     private float BoxSize;
     private Transform background;
 
@@ -17,7 +18,6 @@ public class Box : MonoBehaviour
     {
         instance = this;
         RectPos = gameObject.GetComponent<RectTransform>().anchoredPosition;
-        startPos = RectPos;
         background = InGameManager.instance.background;
         BoxSize = InGameManager.instance.BoxSize;
         gameObject.GetComponent<Animator>().enabled = false;
@@ -30,7 +30,7 @@ public class Box : MonoBehaviour
             
             if (RectPos.y > to.y+30)
             {
-                RectPos.y -= 2;
+                RectPos.y -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
             }
             else
@@ -46,7 +46,7 @@ public class Box : MonoBehaviour
 
             if (RectPos.y < to.y - 30)
             {
-                RectPos.y += 2;
+                RectPos.y += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
             }
             else
@@ -61,7 +61,7 @@ public class Box : MonoBehaviour
         {
             if (RectPos.x <= to.x - 30)
             {
-                RectPos.x += 2;
+                RectPos.x += 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
             }
             else 
@@ -75,7 +75,7 @@ public class Box : MonoBehaviour
         {
             if (RectPos.x >= to.x + 30)
             {
-                RectPos.x -= 2;
+                RectPos.x -= 30;
                 gameObject.GetComponent<RectTransform>().anchoredPosition = RectPos;
             }
             else
@@ -90,22 +90,25 @@ public class Box : MonoBehaviour
     {
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
-        
-        InGameManager.instance.UnsetBox(0);
-
-        setBox(value);
-
-        InGameManager.instance.grid.pointsArray[x, y].moving = false;
-
+        setBox();
+        if (DestroyBox != null)
+        {
+            DestroyBox.SetActive(false);
+            DestroyBox.gameObject.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
+            DestroyBox.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
+            GameObject textgObj = DestroyBox.transform.GetChild(0).gameObject;
+            Text text = textgObj.GetComponent<Text>();
+            text.color = new Color(0f, 0f, 0f);
+        }
+            InGameManager.instance.grid.pointsArray[x, y].moving = false;
         InGameManager.instance.SpawnBox();
-
     }
 
-    private void setBox( int SCORE)
+    private void setBox()
     {
-
-        GameObject textgObj = InGameManager.instance.grid.pointsArray[x , y].box.transform.GetChild(0).gameObject;
+        GameObject textgObj =transform.GetChild(0).gameObject;
         Text text = textgObj.GetComponent<Text>();
+        text.text = "" + value;
 
         Color boxImageColor = new Color(237, 224, 200);
         switch (value)
@@ -158,15 +161,14 @@ public class Box : MonoBehaviour
                 boxImageColor = new Color(0.933f, 0.894f, 0.854f);
                 break;
         }
-        InGameManager.instance.grid.pointsArray[x, y].box.gameObject.GetComponent<Image>().color = boxImageColor;
-        InGameManager.instance.grid.pointsArray[x, y].box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
+        gameObject.GetComponent<Image>().color = boxImageColor;
+        GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
 
         if (increamented)
         {
             increamented = false;
-            InGameManager.instance.grid.pointsArray[x, y].box.GetComponent<Animator>().enabled = true;
+            GetComponent<Animator>().enabled = true;
         }
-        text.text = "" + SCORE;
     }
 
     public void DestroyJbox()
