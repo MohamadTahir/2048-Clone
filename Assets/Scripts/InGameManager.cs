@@ -203,6 +203,10 @@ public class InGameManager : MonoBehaviour
         float posx = BoxSize / 2 + PartOfBoxSize;
         float posy = -BoxSize / 2 - PartOfBoxSize;
 
+        GameObject textgObj = box.transform.GetChild(0).gameObject;
+        Text text = textgObj.GetComponent<Text>();
+        text.fontSize = (int)BoxSize;
+
         int index = 0;
         for (int x = 0; x < gameSize; x++)
         {

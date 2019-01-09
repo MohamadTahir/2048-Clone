@@ -164,6 +164,16 @@ public class Box : MonoBehaviour
                 boxImageColor = new Color(0.933f, 0.894f, 0.854f);
                 break;
         }
+
+        if (value > 9999)
+        {
+            text.fontSize = (int)BoxSize - 10;
+        }
+        if (value > 99999)
+        {
+            text.fontSize = (int)BoxSize - 5;
+        }
+
         gameObject.GetComponent<Image>().color = boxImageColor;
         GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
 
