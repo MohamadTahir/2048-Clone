@@ -7,7 +7,7 @@ public class Box : MonoBehaviour
 
     public Vector2 to;
     public int  x, y, value;
-    public GameObject DestroyBox;
+    public InGameManager.Boxes DestroyBox;
     public bool allowMoveDown = false, allowMoveUp = false, allowMoveRight = false, allowMoveLeft = false, Y = false, increamented = false;
     
     public Vector2 RectPos;
@@ -91,16 +91,17 @@ public class Box : MonoBehaviour
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
         setBox();
-        if (DestroyBox != null)
+        if (DestroyBox != null && !DestroyBox.InUse)
         {
-            DestroyBox.SetActive(false);
-            DestroyBox.gameObject.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
-            DestroyBox.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
-            GameObject textgObj = DestroyBox.transform.GetChild(0).gameObject;
+            DestroyBox.box.gameObject.SetActive(false);
+            DestroyBox.box.gameObject.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
+            DestroyBox.box.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
+            GameObject textgObj = DestroyBox.box.transform.GetChild(0).gameObject;
             Text text = textgObj.GetComponent<Text>();
             text.color = new Color(0f, 0f, 0f);
         }
-            InGameManager.instance.grid.pointsArray[x, y].moving = false;
+
+        InGameManager.instance.grid.pointsArray[x, y].moving = false;
         InGameManager.instance.SpawnBox();
     }
 
