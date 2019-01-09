@@ -90,7 +90,9 @@ public class Box : MonoBehaviour
     {
         gameObject.GetComponent<RectTransform>().anchoredPosition = to;
         RectPos = to;
+
         setBox();
+
         if (DestroyBox != null && !DestroyBox.InUse)
         {
             DestroyBox.box.gameObject.SetActive(false);
