@@ -29,8 +29,7 @@ public class InGameManager : MonoBehaviour
         init();
         CreateGrid();
         SetHighScore();
-        SpawnBox();
-        //LoadGame();
+        LoadGame();
         setScore(PlayerPrefs.GetInt("score", 0));
     }
     
@@ -742,7 +741,13 @@ public class InGameManager : MonoBehaviour
             {
                 if (grid.pointsArray[x, y].value != -1)
                 {
-                    UnsetBox(x, y).box.gameObject.SetActive(false);
+                    GameObject box = UnsetBox(x, y).box.gameObject;
+                    box.SetActive(false);
+                    box.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
+                    box.GetComponent<RectTransform>().sizeDelta = new Vector2(35, 35);
+                    GameObject textgObj = box.transform.GetChild(0).gameObject;
+                    Text text = textgObj.GetComponent<Text>();
+                    text.color = new Color(0f, 0f, 0f);
                     grid.pointsArray[x, y].value = -1;
                 }
             }
