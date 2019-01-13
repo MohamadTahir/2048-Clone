@@ -6,7 +6,9 @@ public class AdsManager : MonoBehaviour
 {
     private BannerView bannerView;
     private InterstitialAd interstitial;
-  
+    private bool ShowInterstitial = false;
+    public bool ShowingBanner = false;
+
     public static AdsManager instance;
 
     void Start()
@@ -22,7 +24,6 @@ public class AdsManager : MonoBehaviour
         instance = this;
         MobileAds.Initialize(appId);
         RequestBanner();
-        RequestInterstitial();
     }
 
     public void RequestBanner()
@@ -39,15 +40,22 @@ public class AdsManager : MonoBehaviour
 
         bannerView = new BannerView(adUnitId, AdSize.Banner, AdPosition.Bottom);
         bannerView.OnAdFailedToLoad += HandleOnAdFailedToLoadBanner;
+        bannerView.OnAdLoaded += HandleBannerLoaded;
 
         AdRequest request = new AdRequest.Builder().Build();
         bannerView.LoadAd(request);
     }
 
+    public void HandleBannerLoaded(object sender, EventArgs args)
+    {
+        ShowingBanner=true;
+    }
+
     public void HandleOnAdFailedToLoadBanner(object sender, AdFailedToLoadEventArgs args)
     {
+        ShowingBanner = false;
+        InGameManager.instance.BannerRequestSent = false;
         bannerView.Destroy();
-        RequestBanner();
     }
 
     public void RequestInterstitial()
@@ -64,8 +72,14 @@ public class AdsManager : MonoBehaviour
         interstitial.OnAdClosed += HandleOnAdClosedInterstitial;
         interstitial.OnAdFailedToLoad += HandleOnAdFailedToLoadBanner;
         interstitial.OnAdOpening += HandleOnAdOpenedInterstitial;
+        interstitial.OnAdLoaded += HandleOnAdLoadedInterstitial;
         AdRequest request = new AdRequest.Builder().Build();
         interstitial.LoadAd(request);
+    }
+
+    private void HandleOnAdLoadedInterstitial(object sender, EventArgs args)
+    {
+        ShowInterstitial = true;
     }
 
     public void HandleOnAdOpenedInterstitial(object sender, EventArgs args)
@@ -73,24 +87,27 @@ public class AdsManager : MonoBehaviour
         InGameManager.instance.NumbOfSpawns = 0;
     }
 
-
     public void HandleOnAdClosedInterstitial(object sender, EventArgs args)
     {
+        InGameManager.instance.InterstitialRequestSent = false;
         interstitial.Destroy();
-        RequestInterstitial();
     }
 
     public void HandleOnAdFailedToLoadInterstitial(object sender, AdFailedToLoadEventArgs args)
     {
+        InGameManager.instance.NumbOfSpawns = 0;
+        InGameManager.instance.InterstitialRequestSent = false;
         interstitial.Destroy();
-        RequestInterstitial();
     }
 
     public void ShowAdd()
     {
-        if (interstitial.IsLoaded())
-        {
-            interstitial.Show();
+        if (ShowInterstitial) {
+            if (interstitial.IsLoaded())
+            {
+                Debug.Log("shwoing Interstitial");
+                interstitial.Show();
+            }
         }
     }
 }

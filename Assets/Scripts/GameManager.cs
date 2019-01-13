@@ -9,16 +9,22 @@ public class GameManager : MonoBehaviour
     public Text GameModeTxt;
     public string[] GameModes;
     public Sprite[] GameModeImg;
-    public int GameMode = 1;
-
     public bool testMode = true;
 
     public static int TheGameSize;
     public static GameManager Instance;
 
+    private int GameMode;
+
     private void Start()
     {
         Instance = this;
+
+        if (SceneManager.GetActiveScene().buildIndex == 0) {
+            GameMode = PlayerPrefs.GetInt("GameMode", 1);
+            GameModeTxt.text = GameModes[GameMode];
+            ModeImage.sprite = GameModeImg[GameMode];
+        }
     }
 
     private void Update()
@@ -33,9 +39,9 @@ public class GameManager : MonoBehaviour
             {
                 SceneManager.LoadScene(0);
                 AdsManager.instance.ShowAdd();
+                Destroy(this.gameObject);
             }
         }
-
     }
 
     public void LeftArrowPressed()
@@ -44,6 +50,7 @@ public class GameManager : MonoBehaviour
         if (GameMode < 0)
             GameMode = 4;
 
+        PlayerPrefs.SetInt("GameMode", GameMode);
         GameModeTxt.text = GameModes[GameMode];
         ModeImage.sprite = GameModeImg[GameMode];
     }
@@ -51,9 +58,11 @@ public class GameManager : MonoBehaviour
     public void RightArrowPressed()
     {
         GameMode++;
+        
         if (GameMode > 4)
             GameMode = 0;
 
+        PlayerPrefs.SetInt("GameMode", GameMode);
         GameModeTxt.text = GameModes[GameMode];
         ModeImage.sprite = GameModeImg[GameMode];
     }
@@ -95,6 +104,7 @@ public class GameManager : MonoBehaviour
     {
         InGameManager.instance.CurrentData.Clear();
         File.Delete(Application.persistentDataPath + "/SaveGame"+TheGameSize+".dat");
+        File.Delete(Application.persistentDataPath + "/PreviousStep.dat");
         PlayerPrefs.SetInt("score", 0);
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
