@@ -698,7 +698,8 @@ PlayerSettings:
   webGLThreadsSupport: 0
   scriptingDefineSymbols: {}
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Android: 1
   il2cppCompilerConfiguration: {}
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}
@@ -789,7 +790,7 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   cloudProjectId: ac602574-ebbe-4377-a789-7d36ec3eebb8
   framebufferDepthMemorylessMode: 0
-  projectName: 2048
+  projectName: 2048-Clone
   organizationId: callmedrug
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0

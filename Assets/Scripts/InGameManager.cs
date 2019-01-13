@@ -18,8 +18,9 @@ public class InGameManager : MonoBehaviour
     public Boxes[] boxes;
     public List<previousData> CurrentData;
     public int NumbOfSpawns = 0;
+    public bool BannerRequestSent = false, InterstitialRequestSent=false;
 
-    private float sensitivity=50;
+    private float sensitivity=35;
     private int SpawnX, SpawnY, Highscore, score, NumberOfFreeGrids=0, NumberOfGrids,PrevScore=0,tempPreviousScore;
     private bool IncreaseBoxSize = false, twoMatchingOnY, twoMatchingOnX, allowMove = true, allowSpawn=true;
     private List<previousData> previousStep, previousStepTemp, temp;
@@ -118,10 +119,34 @@ public class InGameManager : MonoBehaviour
             {
                 IncreaseBoxSize = false;
                 grid.pointsArray[SpawnX, SpawnY].box.GetComponent<RectTransform>().sizeDelta = new Vector2(BoxSize, BoxSize);
+                
                 allowMove = true;
+
+                manageAds();
             }
 
         }
+    }
+
+    private void manageAds()
+    {
+        if (NumbOfSpawns >= 75)
+        {
+            if (!AdsManager.instance.ShowingBanner && !BannerRequestSent)
+            {
+                BannerRequestSent = true;
+                AdsManager.instance.RequestBanner();
+            }
+
+            if (!InterstitialRequestSent)
+            {
+                InterstitialRequestSent = true;
+                AdsManager.instance.RequestInterstitial();
+            }
+        }
+
+        if (NumbOfSpawns > 150 )
+            AdsManager.instance.ShowAdd();
     }
 
     public class Boxes
@@ -252,6 +277,7 @@ public class InGameManager : MonoBehaviour
                 if (grid.pointsArray[Randx, Randy].value == -1)
                 {
                     grid.pointsArray[Randx, Randy].box = getAvailableBox(Randx, Randy);
+                    grid.pointsArray[Randx, Randy].box.GetComponent<Image>().color = new Color(0.964f, 0.945f, 0.898f);
                     Box boxScript = grid.pointsArray[Randx, Randy].box.GetComponent<Box>();
                     boxScript.RectPos = grid.pointsArray[Randx, Randy].pos;
 
@@ -279,10 +305,6 @@ public class InGameManager : MonoBehaviour
 
             NumbOfSpawns++;
 
-            if (NumbOfSpawns > 150)
-            {
-                AdsManager.instance.ShowAdd();
-            }
             if (NumberOfFreeGrids != NumberOfGrids -1) 
                 SaveGame();
 
@@ -760,24 +782,6 @@ public class InGameManager : MonoBehaviour
         InstantiateBoxes(previousStep);
         checkSurrounding();
     }
-    
-    private List<previousData> StorePreviousTemp()
-    {
-        temp.Clear();
-        for (int x = 0; x < gameSize; x++)
-        {
-            for (int y = 0; y < gameSize; y++)
-            {
-                if (grid.pointsArray[x, y].value != -1)
-                {
-                    previousData pre = new previousData(x, y, grid.pointsArray[x, y].value);
-                    temp.Add(pre);
-                }
-            }
-        }
-        tempPreviousScore = score;
-        return temp;
-    }
 
     private void InstantiateBoxes(List<previousData> BoxList)
     {
@@ -852,25 +856,50 @@ public class InGameManager : MonoBehaviour
         }
     }
 
+    private List<previousData> StorePreviousTemp()
+    {
+        previousStepTemp.Clear();
+        temp.Clear();
+        for (int x = 0; x < gameSize; x++)
+        {
+            for (int y = 0; y < gameSize; y++)
+            {
+                if (grid.pointsArray[x, y].value != -1)
+                {
+                    previousData pre = new previousData(x, y, grid.pointsArray[x, y].value);
+                    temp.Add(pre);
+                }
+            }
+        }
+        tempPreviousScore = score;
+        return temp;
+    }
+
     private void SaveGame()
     {
         CurrentData.Clear();
         CurrentData.AddRange(StorePreviousTemp());
 
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file3 = File.Create(Application.persistentDataPath + "/SaveGame"+gameSize+".dat");
-        bf.Serialize(file3, CurrentData);
-        file3.Close();
+
+        FileStream SaveGameFile = File.Create(Application.persistentDataPath + "/SaveGame"+gameSize+".dat");
+        FileStream PreviousStepFile = File.Create(Application.persistentDataPath + "/PreviousStep.dat");
+
+        bf.Serialize(SaveGameFile, CurrentData);
+        bf.Serialize(PreviousStepFile, previousStep);
+
+        SaveGameFile.Close();
+        PreviousStepFile.Close();
     }
 
     private void LoadGame()
     {
+        BinaryFormatter bf = new BinaryFormatter();
         if (File.Exists(Application.persistentDataPath + "/SaveGame" + gameSize + ".dat"))
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/SaveGame"+gameSize+".dat", FileMode.Open);
-            List<previousData> savedGames = (List<previousData>)bf.Deserialize(file);
-            file.Close();
+            FileStream SaveGameFile = File.Open(Application.persistentDataPath + "/SaveGame"+gameSize+".dat", FileMode.Open);
+            List<previousData> savedGames = (List<previousData>)bf.Deserialize(SaveGameFile);
+            SaveGameFile.Close();
 
             if (savedGames.Count > 0)
                 InstantiateBoxes(savedGames);
@@ -878,8 +907,13 @@ public class InGameManager : MonoBehaviour
                 SpawnBox();
         }
         else
-        {
             SpawnBox();
+
+        if (File.Exists(Application.persistentDataPath + "/PreviousStep.dat"))
+        {
+            FileStream PreviousStepFile = File.Open(Application.persistentDataPath + "/PreviousStep.dat", FileMode.Open);
+            previousStep = (List<previousData>)bf.Deserialize(PreviousStepFile);
+            PreviousStepFile.Close();
         }
     }
 
